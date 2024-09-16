@@ -43,7 +43,7 @@ export const initPassport = () => {
 
           const { first_name, last_name, age } = req.body;
 
-          const newUser = new User({
+          const newUser = new UserSchemma({
             first_name,
             last_name,
             email: username,

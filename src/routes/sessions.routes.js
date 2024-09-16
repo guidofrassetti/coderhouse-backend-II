@@ -90,6 +90,13 @@ app.get("/failLogin", (req, res) => {
   res.send("Register failed").json;
 });
 
+app.get("/failRegister", (req, res) => {
+  res.json({
+    message: "Register failed",
+  });
+  res.send("Register failed").json;
+});
+
 app.post(
   "/register",
   passport.authenticate("register", {
@@ -101,7 +108,6 @@ app.post(
     res.status(201).json({
       message: "User created",
     });
-    res.redirect("/login");
 
     /* const { first_name, last_name, email, age, password } = req.body;
     if (!first_name || !last_name || !email || !age || !password) {
