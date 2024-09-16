@@ -2,7 +2,7 @@ import passport from "passport";
 import local from "passport-local";
 import { UserSchemma } from "../models/user.model.js";
 import { createHash, getJWTCookie } from "../utils.js";
-import jwt, { ExtractJwt } from "passport-jwt";
+import jwt, { ExtractJwt, Strategy as jwtStrategy } from "passport-jwt";
 
 const localStrategy = local.Strategy;
 
@@ -36,20 +36,23 @@ export const initPassport = () => {
       },
       async (req, username, password, done) => {
         try {
-          const { first_name, last_name, email, age } = req.body;
           const userFound = await UserSchemma.findOne({ email: username });
-          //usario ya registrado, devolvemos error
-          userFound ? done(null, false) : done(null, true);
+          if (userFound) {
+            return done(null, false, { message: "User already exists" });
+          }
 
-          const newUser = {
+          const { first_name, last_name, age } = req.body;
+
+          const newUser = new User({
             first_name,
             last_name,
-            email,
+            email: username,
             age,
             password: createHash(password),
-          };
-          const user = await UserSchemma.create(newUser);
-          return done(null, user);
+          });
+
+          await newUser.save();
+          return done(null, newUser);
         } catch (error) {
           return done(error);
         }

@@ -92,11 +92,16 @@ app.get("/failLogin", (req, res) => {
 
 app.post(
   "/register",
-  passport.authenticate("register", { failureRedirect: "/failRegister" }),
+  passport.authenticate("register", {
+    failureRedirect: "/failRegister",
+    session: false,
+    successRedirect: "/login",
+  }),
   async (req, res) => {
     res.status(201).json({
       message: "User created",
     });
+    res.redirect("/login");
 
     /* const { first_name, last_name, email, age, password } = req.body;
     if (!first_name || !last_name || !email || !age || !password) {
