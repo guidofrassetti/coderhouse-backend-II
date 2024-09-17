@@ -69,7 +69,7 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    const user = await UserSchemma.findOne({ email });
+    const user = await UserSchemma.findOne({ email }).lean();
     if (!user || !isValidPassword(user, password)) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
