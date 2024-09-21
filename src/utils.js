@@ -9,7 +9,7 @@ const createHash = (password) => {
 };
 
 const isValidPassword = (user, password) => {
-  return bcrypt.compareSync(password, user.password); //user.password es el password de la base de datos
+  return bcrypt.compareSync(password, user.password);
 };
 
 const generateToken = (user) => {

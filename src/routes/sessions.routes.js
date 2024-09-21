@@ -8,10 +8,6 @@ app.get("/getSession", (req, res) => {
   res.render({ session: req.session });
 });
 
-app.get("/login", (req, res) => {
-  res.render("login");
-});
-
 app.get("failLogin", (req, res) => {
   res.render("failLogin");
 });
@@ -67,7 +63,6 @@ app.post("/login", async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
-
   try {
     const user = await UserSchemma.findOne({ email }).lean();
     if (!user || !isValidPassword(user, password)) {
@@ -97,6 +92,7 @@ app.get("/failRegister", (req, res) => {
   res.send("Register failed").json;
 });
 
+/* Registo */
 app.post(
   "/register",
   passport.authenticate("register", {
@@ -108,6 +104,8 @@ app.post(
     res.status(201).json({
       message: "User created",
     });
+
+    /* Metodo sin passport - tradicional */
 
     /* const { first_name, last_name, email, age, password } = req.body;
     if (!first_name || !last_name || !email || !age || !password) {
