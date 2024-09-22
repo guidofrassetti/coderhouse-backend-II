@@ -1,7 +1,7 @@
 import passport from "passport";
 import local from "passport-local";
 import { UserSchemma } from "../models/user.model.js";
-import { createHash, getJWTCookie } from "../utils.js";
+import { createHash, getJWTCookie, isValidPassword } from "../utils.js";
 import jwt, { ExtractJwt, Strategy as jwtStrategy } from "passport-jwt";
 
 const localStrategy = local.Strategy;
@@ -59,14 +59,14 @@ export const initPassport = () => {
       }
     )
   );
-  /* 
+
   passport.use(
     "login",
     new localStrategy(
       { usernameField: "email", passReqToCallback: true },
       async (req, username, password, done) => {
         try {
-          const user = await UserSchemma.findOne({ email: username });
+          const user = await UserSchemma.findOne({ email: username }).lean();
           if (!user) return done(null, false);
           if (!isValidPassword(user, password)) return done(null, false);
           return done(null, user);
@@ -75,7 +75,7 @@ export const initPassport = () => {
         }
       }
     )
-  ); */
+  );
   //En JWT, la información del usuario se envía en el token mismo, que se firma digitalmente y se envía en cada solicitud.
   //Passort: alamcenar en la session del servidor el id del usuario, se envia una cookie (La sesión se identifica mediante un ID de sesión único que se envía al cliente en una cookie.)
   passport.serializeUser((user, done) => {

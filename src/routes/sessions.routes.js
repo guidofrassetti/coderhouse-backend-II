@@ -1,15 +1,19 @@
 import { Router } from "express";
 const app = Router();
 import { UserSchemma } from "../models/user.model.js";
-import { isValidPassword, generateToken } from "../utils.js";
+import { isValidPassword, generateToken, decodeToken } from "../utils.js";
 import passport from "passport";
 
-app.get("/getSession", (req, res) => {
+/* app.get("/getSession", (req, res) => {
   res.render({ session: req.session });
+}); */
+
+app.get("/profile", decodeToken, (req, res) => {
+  res.render("profile", { user: req.user });
 });
 
-app.get("failLogin", (req, res) => {
-  res.render("failLogin");
+app.get("/failLogin", (req, res) => {
+  res.status(401).json({ message: "Login failed" });
 });
 
 app.get(
@@ -32,57 +36,50 @@ app.get(
 /* app.post(
   "/login",
   passport.authenticate("login", { failureRedirect: "/failLogin" }),
-  (req, res) => {
-    if (!req.user)
-      return res.status(400).json({ message: "Invalid credentials" });
-    res
-      .status(200)
-      .json({ message: "Login successful", user: req.user.first_name });
-
-      const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({
-      message: "All fields are required",
-    });
-
-  try {
-    const user = await UserSchemma.findOne({ email }).lean();
-    if (!isValidPassword(user, password))
-      return res.status(404).json({ message: "Invalid credentials" });
-    if (!user) return res.status(404).json({ message: "Invalid credentials" });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error creating user",
-    });
-  } 
-  }
-); */
-
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-  try {
-    const user = await UserSchemma.findOne({ email }).lean();
-    if (!user || !isValidPassword(user, password)) {
-      return res.status(400).json({ message: "Invalid credentials" });
+  async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ message: "All fields are required" });
+    try {
+      const user = await UserSchemma.findOne({ email }).lean();
+      if (!user || !isValidPassword(user, password)) {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
+      const token = generateToken(user);
+      res
+        .status(200)
+        .cookie("currentUser", token, { httpOnly: true, signed: true })
+        .json({
+          message: "Login successful",
+          user: req.user.first_name,
+          token,
+        });
+    } catch (error) {
+      res.status(500).json({ message: "Error during login" });
     }
-    const token = generateToken(user);
-    res
-      .status(200)
-      .cookie("currentUser", token, { httpOnly: true, signed: true })
-      .json({ message: "Login successful", token });
-  } catch (error) {
-    res.status(500).json({ message: "Error during login" });
   }
-});
-
-app.get("/failLogin", (req, res) => {
-  res.json({
-    message: "Register failed",
-  });
-  res.send("Register failed").json;
+);
+ */
+//login sin passport
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await UserSchemma.findOne({ email }).lean();
+    if (isValidPassword(user, password)) {
+      const token = generateToken(user);
+      return res
+        .status(200)
+        .cookie("currentUser", token, { httpOnly: true, signed: true })
+        .json({
+          message: "Login successful",
+          user: req.user.first_name,
+          token,
+        });
+    }
+    return res.status(400).json({ message: "Invalid credentials" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error during login" });
+  }
 });
 
 app.get("/failRegister", (req, res) => {

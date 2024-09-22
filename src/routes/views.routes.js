@@ -7,6 +7,10 @@ ViewsRouter.get("/", (req, res) => {
   res.render("Home");
 });
 
+ViewsRouter.get("/profile", (req, res) => {
+  res.render("profile", { user: req.user });
+});
+
 ViewsRouter.get("/login", (req, res) => {
   res.render("Login");
 });
