@@ -69,10 +69,10 @@ app.post("/login", async (req, res) => {
       const token = generateToken(user);
       return res
         .status(200)
-        .cookie("currentUser", token, { httpOnly: true, signed: true })
+        .cookie("currentUser", token, { httpOnly: true })
         .json({
           message: "Login successful",
-          user: req.user.first_name,
+          user: user.first_name,
           token,
         });
     }
