@@ -60,7 +60,7 @@ export const initPassport = () => {
     )
   );
 
-  passport.use(
+  /*   passport.use(
     "login",
     new localStrategy(
       { usernameField: "email", passReqToCallback: true },
@@ -75,7 +75,7 @@ export const initPassport = () => {
         }
       }
     )
-  );
+  ); */
   //En JWT, la información del usuario se envía en el token mismo, que se firma digitalmente y se envía en cada solicitud.
   //Passort: alamcenar en la session del servidor el id del usuario, se envia una cookie (La sesión se identifica mediante un ID de sesión único que se envía al cliente en una cookie.)
   passport.serializeUser((user, done) => {

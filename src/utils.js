@@ -18,7 +18,8 @@ const generateToken = (user) => {
   });
 };
 
-const decodeToken = (req, res, next) => {
+//no usamos mas esto xq el jwt passport decodigica el token
+/* const decodeToken = (req, res, next) => {
   const token = req.headers.authorization;
   if (!token) {
     return res.status(401).send({ message: "No token provided" });
@@ -30,7 +31,7 @@ const decodeToken = (req, res, next) => {
     req.userId = decoded.id;
     next();
   });
-};
+}; */
 
 const getJWTCookie = (req) => {
   let token = null;
@@ -40,10 +41,4 @@ const getJWTCookie = (req) => {
   return token;
 };
 
-export {
-  createHash,
-  isValidPassword,
-  generateToken,
-  decodeToken,
-  getJWTCookie,
-};
+export { createHash, isValidPassword, generateToken, getJWTCookie };

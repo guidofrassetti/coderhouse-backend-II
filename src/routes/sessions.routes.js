@@ -1,24 +1,22 @@
 import { Router } from "express";
 const app = Router();
 import { UserSchemma } from "../models/user.model.js";
-import { isValidPassword, generateToken, decodeToken } from "../utils.js";
+import { isValidPassword, generateToken } from "../utils.js";
 import passport from "passport";
+import handleAuth from "../middlewares/handle_auth.js";
 
 /* app.get("/getSession", (req, res) => {
   res.render({ session: req.session });
 }); */
-
-app.get("/profile", decodeToken, (req, res) => {
-  res.render("profile", { user: req.user });
-});
 
 app.get("/failLogin", (req, res) => {
   res.status(401).json({ message: "Login failed" });
 });
 
 app.get(
-  "/current",
+  "/profile",
   passport.authenticate("jwt", { session: false }),
+  handleAuth("admin"),
   (req, res) => {
     res.status(200).json({
       message: "Authenticated user",
@@ -46,14 +44,11 @@ app.get(
         return res.status(400).json({ message: "Invalid credentials" });
       }
       const token = generateToken(user);
-      res
-        .status(200)
-        .cookie("currentUser", token, { httpOnly: true, signed: true })
-        .json({
-          message: "Login successful",
-          user: req.user.first_name,
-          token,
-        });
+      res.status(200).cookie("currentUser", token, { httpOnly: true }).json({
+        message: "Login successful",
+        user: user.first_name,
+        token,
+      });
     } catch (error) {
       res.status(500).json({ message: "Error during login" });
     }
@@ -66,10 +61,18 @@ app.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await UserSchemma.findOne({ email }).lean();
     if (isValidPassword(user, password)) {
-      const token = generateToken(user);
+      const token = generateToken({
+        email: user.email,
+        name: user.first_name,
+        role: user.role,
+      });
       return res
         .status(200)
-        .cookie("currentUser", token, { httpOnly: true })
+        .cookie("currentUser", token, {
+          httpOnly: true,
+          maxAge: 60000,
+          signed: true,
+        })
         .json({
           message: "Login successful",
           user: user.first_name,
