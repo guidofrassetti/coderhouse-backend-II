@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 import passport from "passport";
 import dotenv from "dotenv";
 import { engine } from "express-handlebars";
-import UserSessionRouter from "./routes/sessions.routes.js";
-import ViewsRouter from "./routes/views.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { initPassport, jwtPassport } from "./config/passport.js";
+import router from "./routes/index.js";
+import cookieParser from "cookie-parser";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,8 +30,8 @@ app.use(express.static(path.join(__dirname, "public")));
 
 initPassport();
 jwtPassport();
-app.use("/api/sessions", UserSessionRouter);
-app.use("/", ViewsRouter);
+
+app.use("/", router);
 
 mongoose
   .connect(process.env.MONGO_URI, {
