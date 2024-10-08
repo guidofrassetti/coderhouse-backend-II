@@ -1,5 +1,7 @@
 import { createHash, isValidPassword, generateToken } from "../utils.js";
 import UserService from "../services/user.services.js";
+import { sendEmail } from "../services/email.service.js";
+
 
 const userService = new UserService();
 
@@ -35,6 +37,21 @@ export const login = async (req, res) => {
 
 export const register = (req, res) => userService.register(req, res);
 export const profile = (req, res) => userService.profile(req, res);
+
+export const sendEmailController = async (req, res) => {
+  const { email, subject, message } = req.body;
+
+  if (!email || !subject || !message) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    await sendEmail(email, subject, message);
+    res.status(200).json({ message: 'Email sent successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending email', error });
+  }
+};
 
 /* export const profile = (req, res) => {
   passport.authenticate("jwt", { session: false }),

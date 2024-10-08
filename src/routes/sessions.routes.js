@@ -1,5 +1,5 @@
 import CustomRouter from "./custom.router.js";
-import { login, register, profile } from "../controllers/user.controller.js";
+import { login, register, profile, sendEmailController  } from "../controllers/user.controller.js";
 
 export default class SessionsRouter extends CustomRouter {
   init() {
@@ -15,6 +15,7 @@ export default class SessionsRouter extends CustomRouter {
       });
       res.send("Register failed").json;
     });
+    this.post("/send-email", ["USER"], sendEmailController); 
   }
 }
 
