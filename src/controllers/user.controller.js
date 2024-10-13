@@ -1,11 +1,11 @@
 import { createHash, isValidPassword, generateToken } from "../utils.js";
 import UserService from "../services/user.services.js";
-import { sendEmail } from "../services/email.service.js";
+import { sendEmail } from "../services/nodemailer.js";
 
 
 const userService = new UserService();
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     //const user = await UserSchemma.findOne({ email }).lean();

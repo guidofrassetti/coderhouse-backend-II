@@ -1,8 +1,11 @@
 import passport from "passport";
 import local from "passport-local";
 import { UserSchemma } from "../models/user.model.js";
-import { createHash, getJWTCookie, isValidPassword } from "../utils.js";
+import { createHash, getJWTCookie } from "../utils.js";
 import jwt, { ExtractJwt, Strategy as jwtStrategy } from "passport-jwt";
+import DatabaseDao from "../models/dao.js";
+
+const userDAO = new DatabaseDao(UserSchemma);
 
 const localStrategy = local.Strategy;
 
@@ -36,22 +39,21 @@ export const initPassport = () => {
       },
       async (req, username, password, done) => {
         try {
-          const userFound = await UserSchemma.findOne({ email: username });
+          console.log('passport init')
+
+          const userFound = await userDAO.getByEmail( username );
           if (userFound) {
             return done(null, false, { message: "User already exists" });
           }
 
           const { first_name, last_name, age } = req.body;
-
-          const newUser = new UserSchemma({
+          const newUser = await userDAO.create({
             first_name,
             last_name,
             email: username,
             age,
             password: createHash(password),
           });
-
-          await newUser.save();
           return done(null, newUser);
         } catch (error) {
           return done(error);
@@ -60,30 +62,13 @@ export const initPassport = () => {
     )
   );
 
-  /*   passport.use(
-    "login",
-    new localStrategy(
-      { usernameField: "email", passReqToCallback: true },
-      async (req, username, password, done) => {
-        try {
-          const user = await UserSchemma.findOne({ email: username }).lean();
-          if (!user) return done(null, false);
-          if (!isValidPassword(user, password)) return done(null, false);
-          return done(null, user);
-        } catch (error) {
-          done(error);
-        }
-      }
-    )
-  ); */
   //En JWT, la información del usuario se envía en el token mismo, que se firma digitalmente y se envía en cada solicitud.
   //Passort: alamcenar en la session del servidor el id del usuario, se envia una cookie (La sesión se identifica mediante un ID de sesión único que se envía al cliente en una cookie.)
-  passport.serializeUser((user, done) => {
-    done(null, user._id); //No va a haber error / el id del usuario (cookie va a enviar solo id)
+/*   passport.serializeUser((user, done) => {
+    done(null, user._id); 
   });
   passport.deserializeUser(async (id, done) => {
-    //deserializar para recuperar parametros
-    const user = await UserSchemma.findById(id); //recuperamos el usuario por id
+    const user = await UserSchemma.findById(id); 
     done(null, user);
-  });
+  }); */
 };
